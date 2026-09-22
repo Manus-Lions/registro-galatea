@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Registro dei giudizi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&family=IBM+Plex+Sans:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#ECEFEA; --paper:#F7F8F5; --ink:#1F2A30; --ink2:#55626A; --rule:#C9CEC6;
+  --keep:#2F5D50; --keep-bg:#E1ECE6; --drop:#7A3B3B; --drop-bg:#F1E4E2; --focus:#3C6E8F;
+  --serif:"Source Serif 4", Georgia, "Times New Roman", serif;
+  --sans:"IBM Plex Sans", -apple-system, "Helvetica Neue", Arial, sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root{ --bg:#161B1E; --paper:#1D2428; --ink:#E3E6E1; --ink2:#9AA5AB; --rule:#34403F;
+    --keep:#8CC2AE; --keep-bg:#1F3129; --drop:#D9A09A; --drop-bg:#3A2525; --focus:#7FB3D5; }
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:28px 20px 60px}
+header{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:12px;border-bottom:1px solid var(--rule);padding-bottom:16px;margin-bottom:20px}
+h1{font-family:var(--serif);font-weight:400;font-size:34px;letter-spacing:-.01em;margin:0}
+.sub{color:var(--ink2);margin:4px 0 0;max-width:62ch}
+.sync{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink2)}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--rule);flex:none}
+.dot.ok{background:var(--keep)} .dot.busy{background:var(--focus)} .dot.bad{background:var(--drop)}
+.sync button{font:inherit;font-size:13px;background:none;border:0;color:var(--ink);text-decoration:underline;cursor:pointer;padding:0}
+details.conn{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:0 18px;margin-bottom:22px}
+details.conn summary{cursor:pointer;padding:14px 0;font-weight:500}
+details.conn .body{padding:0 0 18px}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:28px}
+@media (max-width:900px){.grid{grid-template-columns:1fr}}
+section.card{background:var(--paper);border:1px solid var(--rule);border-radius:6px;padding:20px}
+h2{font-family:var(--serif);font-weight:600;font-size:20px;margin:0 0 14px}
+h3{font-size:14px;font-weight:500;margin:18px 0 8px}
+.types{display:flex;border:1px solid var(--rule);border-radius:6px;overflow:hidden;margin-bottom:18px;width:fit-content;max-width:100%}
+.types button{border:0;border-right:1px solid var(--rule);background:transparent;color:var(--ink2);padding:8px 14px;font:inherit;cursor:pointer}
+.types button:last-child{border-right:0}
+.types button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+.hint{font-weight:400;color:var(--ink2)}
+textarea,input[type=text],input[type=password],select{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--rule);border-radius:4px;padding:9px 11px}
+textarea{font-family:var(--serif);font-size:16px;line-height:1.65;resize:vertical;min-height:110px}
+textarea.prompt{min-height:80px}
+:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.field{margin-bottom:16px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.keep textarea{border-left:4px solid var(--keep)}
+.drop textarea{border-left:4px solid var(--drop)}
+.keep label{color:var(--keep)} .drop label{color:var(--drop)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.row4{display:grid;grid-template-columns:1fr 1fr 110px;gap:14px}
+@media (max-width:640px){.row,.row4{grid-template-columns:1fr}}
+.err{color:var(--drop);font-size:13px;margin-top:4px}
+.actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:6px}
+button.primary,button.ghost{font:inherit;border-radius:4px;padding:9px 16px;cursor:pointer}
+button.primary{background:var(--ink);color:var(--paper);border:1px solid var(--ink)}
+button.ghost{background:transparent;color:var(--ink);border:1px solid var(--rule)}
+button.ghost:hover{border-color:var(--ink2)}
+button:disabled{opacity:.5;cursor:default}
+.kbd{color:var(--ink2);font-size:12px}
+.hidden{display:none!important}
+.ruler{position:relative;height:34px;margin:6px 0 4px}
+.ruler .track{position:absolute;left:0;right:0;top:12px;height:6px;background:var(--bg);border:1px solid var(--rule);border-radius:3px}
+.ruler .fill{position:absolute;left:0;top:12px;height:6px;background:var(--keep);border-radius:3px;max-width:100%}
+.ruler .tick{position:absolute;top:6px;width:1px;height:18px;background:var(--ink2)}
+.ruler .tl{position:absolute;top:24px;font-size:11px;color:var(--ink2);transform:translateX(-50%)}
+.stat{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid var(--rule);font-size:14px}
+.stat:last-child{border-bottom:0}
+.note{font-size:13px;color:var(--ink2);margin:8px 0 0}
+.warn{background:var(--drop-bg);color:var(--drop);border-radius:4px;padding:10px 12px;font-size:13px;margin-bottom:14px}
+.side section+section{margin-top:18px}
+.stack{display:flex;flex-direction:column;gap:8px}
+.stack button{text-align:left}
+.list{margin-top:28px}
+.filters{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px}
+.filters input{flex:1;min-width:200px}
+.filters select{width:auto}
+.entry{border-top:1px solid var(--rule);padding:14px 2px;display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:start}
+.badge{font-size:12px;border-radius:3px;padding:2px 7px;white-space:nowrap}
+.b-dpo{background:var(--keep-bg);color:var(--keep)}
+.b-sft{background:var(--bg);color:var(--ink2);border:1px solid var(--rule)}
+.b-test{background:var(--drop-bg);color:var(--drop)}
+.entry p{margin:0;font-family:var(--serif);font-size:16px}
+.meta{font-size:12px;color:var(--ink2);margin-top:4px}
+.entry .ops{display:flex;gap:6px}
+.entry .ops button{font:inherit;font-size:13px;background:none;border:0;color:var(--ink2);cursor:pointer;padding:2px 4px;text-decoration:underline}
+.empty{color:var(--ink2);padding:20px 2px;border-top:1px solid var(--rule)}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:9px 16px;border-radius:4px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90vw}
+#toast.on{opacity:1}
+@media (prefers-reduced-motion: reduce){#toast{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Registro dei giudizi</h1>
+      <p class="sub">Ogni scelta tra due formulazioni, con la sua ragione. Le annotazioni vengono salvate nel tuo repository privato su GitHub, con la storia di ogni modifica.</p>
+    </div>
+    <div class="sync"><span class="dot" id="dot"></span><span id="syncText">Non collegato</span><button id="retryBtn" class="hidden">Riprova</button></div>
+  </header>
+
+  <details class="conn" id="conn">
+    <summary id="connSummary">Collegamento al repository dei dati</summary>
+    <div class="body">
+      <p class="note" style="margin:0 0 14px">Il token resta solo in questo browser. Serve un token con accesso al solo repository dei dati e permesso «Contents: read and write» (le istruzioni sono nel README).</p>
+      <div class="row4">
+        <div class="field"><label for="cOwner">Utente GitHub</label><input type="text" id="cOwner" autocomplete="off" spellcheck="false"></div>
+        <div class="field"><label for="cRepo">Repository dei dati</label><input type="text" id="cRepo" autocomplete="off" spellcheck="false" placeholder="registro-dati"></div>
+        <div class="field"><label for="cBranch">Ramo</label><input type="text" id="cBranch" autocomplete="off" spellcheck="false" value="main"></div>
+      </div>
+      <div class="field"><label for="cToken">Token di accesso</label><input type="password" id="cToken" autocomplete="off" spellcheck="false"><div class="err" id="e-conn"></div></div>
+      <div class="actions">
+        <button class="primary" id="connBtn">Collega e carica</button>
+        <button class="ghost hidden" id="disconnBtn">Scollega questo dispositivo</button>
+      </div>
+    </div>
+  </details>
+
+  <div id="localWarn" class="warn hidden"></div>
+
+  <div class="grid">
+    <main>
+      <section class="card">
+        <h2 id="formTitle">Nuova annotazione</h2>
+        <div class="types" role="group" aria-label="Tipo di annotazione">
+          <button type="button" data-t="dpo" aria-pressed="true">Coppia di giudizio</button>
+          <button type="button" data-t="sft">Ragionamento completo</button>
+          <button type="button" data-t="test">Banco di prova</button>
+        </div>
+        <p class="note" id="typeNote" style="margin:-6px 0 16px"></p>
+
+        <div class="field">
+          <label for="prompt">Problema <span class="hint">autosufficiente: contiene tutto ciò che serve per rispondere</span></label>
+          <textarea id="prompt" class="prompt"></textarea>
+          <div class="err" id="e-prompt"></div>
+        </div>
+
+        <div id="dpoFields">
+          <div class="pair">
+            <div class="field keep"><label for="chosen">Versione accolta</label><textarea id="chosen"></textarea><div class="err" id="e-chosen"></div></div>
+            <div class="field drop"><label for="rejected">Versione scartata</label><textarea id="rejected"></textarea><div class="err" id="e-rejected"></div></div>
+          </div>
+          <div class="field"><label for="motivazione">Motivazione <span class="hint">perché l'una e non l'altra</span></label><textarea id="motivazione" style="min-height:80px"></textarea></div>
+        </div>
+
+        <div id="sftFields" class="hidden">
+          <div class="field"><label for="risposta" id="rispostaLabel"></label><textarea id="risposta" style="min-height:200px"></textarea><div class="err" id="e-risposta"></div></div>
+        </div>
+
+        <div class="row">
+          <div class="field"><label for="ambiti">Ambiti <span class="hint">separati da virgola</span></label><input type="text" id="ambiti" list="ambitiList" autocomplete="off"><datalist id="ambitiList"></datalist></div>
+          <div class="field"><label for="fonte">Provenienza</label>
+            <select id="fonte"><option value="nuova">Scritta ora</option><option value="esistente">Da materiale esistente</option><option value="modello">Generata dal modello</option></select></div>
+          <div class="field" id="sottField"><label for="sott">Scarto tra le versioni</label>
+            <select id="sott"><option value="1">Evidente</option><option value="2" selected>Plausibili entrambe</option><option value="3">Sottile</option></select></div>
+        </div>
+        <div class="field"><label for="rif">Riferimento <span class="hint">file, articolo o sezione di origine (facoltativo)</span></label><input type="text" id="rif"></div>
+
+        <div class="actions">
+          <button type="button" class="primary" id="saveBtn">Salva annotazione</button>
+          <button type="button" class="ghost hidden" id="cancelBtn">Annulla modifica</button>
+          <span class="kbd">⌘ + Invio per salvare</span>
+        </div>
+      </section>
+
+      <section class="list">
+        <h2>Archivio</h2>
+        <div class="filters">
+          <input type="text" id="q" placeholder="Cerca nel testo, negli ambiti, nelle motivazioni" aria-label="Cerca">
+          <select id="ft" aria-label="Filtra per tipo">
+            <option value="">Tutti i tipi</option><option value="dpo">Coppie di giudizio</option><option value="sft">Ragionamenti completi</option><option value="test">Banco di prova</option>
+          </select>
+        </div>
+        <div id="entries"></div>
+      </section>
+    </main>
+
+    <aside class="side">
+      <section class="card">
+        <h2>Coppie di giudizio</h2>
+        <div class="ruler" aria-hidden="true"><div class="track"></div><div class="fill" id="fill"></div></div>
+        <p class="note" id="rulerNote"></p>
+        <h3>Composizione</h3><div id="stats"></div>
+        <h3>Ambiti più presenti</h3><div id="ambitiStats"></div>
+        <p class="note" id="varNote"></p>
+      </section>
+      <section class="card">
+        <h2>File per l'addestramento</h2>
+        <div class="stack">
+          <button class="primary" id="pubBtn">Aggiorna i file nel repository</button>
+          <button class="ghost" id="dpoBtn">Scarica coppie DPO</button>
+          <button class="ghost" id="sftBtn">Scarica ragionamenti</button>
+          <button class="ghost" id="testBtn">Scarica banco di prova</button>
+          <button class="ghost" id="bkBtn">Scarica backup completo</button>
+          <button class="ghost" id="impBtn">Importa file…</button>
+          <input type="file" id="impFile" accept=".json,.jsonl,application/json" class="hidden">
+        </div>
+        <p class="note">«Aggiorna i file» scrive nella cartella <code>esportazioni</code> del repository i tre file JSONL pronti per TRL. L'importazione accetta anche i backup del registro locale.</p>
+      </section>
+    </aside>
+  </div>
+</div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+const CFG='rg-config-v1', CACHE='rg-cache-v1', DIR='annotazioni', EXP='esportazioni';
+const MILESTONES=[300,1500,5000];
+const NOTES={
+  dpo:"Due risposte allo stesso problema: quella che accogli e quella che scarti. È il materiale per il DPO.",
+  sft:"Un problema e il tuo ragionamento completo. Serve al fine-tuning che precede il DPO.",
+  test:"Problemi riservati alla misura del residuo: non entrano mai nell'addestramento."
+};
+let cfg=null, entries=[], shas={}, dirty=new Set(), tipo='dpo', editing=null, syncing=false;
+const $=id=>document.getElementById(id);
+
+/* ---------- utilità ---------- */
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(toast._t);toast._t=setTimeout(()=>t.classList.remove('on'),2800);}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function norm(s){return String(s||'').trim().toLowerCase().replace(/\s+/g,' ');}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function fmtDate(iso){try{return new Date(iso).toLocaleDateString('it-IT',{day:'numeric',month:'short',year:'numeric'});}catch(e){return '';}}
+function month(e){return String(e.creato||new Date().toISOString()).slice(0,7);}
+function live(){return entries.filter(e=>!e.eliminato);}
+function toB64(str){const b=new TextEncoder().encode(str);let s='';for(let i=0;i<b.length;i+=0x8000)s+=String.fromCharCode.apply(null,b.subarray(i,i+0x8000));return btoa(s);}
+function fromB64(b64){const s=atob(String(b64).replace(/\s/g,''));return new TextDecoder().decode(Uint8Array.from(s,c=>c.charCodeAt(0)));}
+function newer(a,b){return String(a.modificato||'')>=String(b.modificato||'')?a:b;}
+function mergeIn(list){
+  const map=new Map(entries.map(e=>[e.id,e]));
+  list.forEach(e=>{if(!e||!e.id)return;const cur=map.get(e.id);map.set(e.id,cur?newer(cur,e):e);});
+  entries=[...map.values()].sort((a,b)=>String(b.creato).localeCompare(String(a.creato)));
+}
+
+/* ---------- memoria locale (cache) ---------- */
+function loadLocal(){
+  try{cfg=JSON.parse(localStorage.getItem(CFG)||'null');}catch(e){cfg=null;}
+  try{const c=JSON.parse(localStorage.getItem(CACHE)||'null');if(c){entries=c.entries||[];shas=c.shas||{};dirty=new Set(c.dirty||[]);}}catch(e){}
+}
+function saveLocal(){
+  try{localStorage.setItem(CACHE,JSON.stringify({entries,shas,dirty:[...dirty]}));}
+  catch(e){toast('Memoria del browser piena o non disponibile: scarica un backup');}
+}
+function saveCfg(){try{cfg?localStorage.setItem(CFG,JSON.stringify(cfg)):localStorage.removeItem(CFG);}catch(e){}}
+
+/* ---------- GitHub ---------- */
+async function gh(path,opts={}){
+  const url=`https://api.github.com/repos/${encodeURIComponent(cfg.owner)}/${encodeURIComponent(cfg.repo)}${path?'/'+path:''}`;
+  const res=await fetch(url,{...opts,headers:{'Accept':'application/vnd.github+json','Authorization':`Bearer ${cfg.token}`,'X-GitHub-Api-Version':'2022-11-28',...(opts.body?{'Content-Type':'application/json'}:{})}});
+  return res;
+}
+function ghError(res){
+  if(res.status===401) return 'Token non valido o scaduto';
+  if(res.status===403) return 'Il token non ha il permesso di scrittura su questo repository';
+  if(res.status===404) return 'Repository non trovato: controlla utente, nome e che il token vi abbia accesso';
+  return `GitHub ha risposto con errore ${res.status}`;
+}
+async function getFile(path){
+  const res=await gh(`contents/${path}?ref=${encodeURIComponent(cfg.branch)}`);
+  if(res.status===404) return null;
+  if(!res.ok) throw new Error(ghError(res));
+  const j=await res.json();
+  let text;
+  if(j.content&&j.encoding==='base64') text=fromB64(j.content);
+  else { const b=await gh(`git/blobs/${j.sha}`); if(!b.ok) throw new Error(ghError(b)); text=fromB64((await b.json()).content); }
+  return {text,sha:j.sha};
+}
+async function putFile(path,text,message,sha){
+  const body={message,content:toB64(text),branch:cfg.branch};
+  if(sha) body.sha=sha;
+  return gh(`contents/${path}`,{method:'PUT',body:JSON.stringify(body)});
+}
+async function pullAll(){
+  const res=await gh(`contents/${DIR}?ref=${encodeURIComponent(cfg.branch)}`);
+  if(res.status===404){
+    const r2=await gh('');
+    if(!r2.ok) throw new Error(ghError(r2));
+    return;
+  }
+  if(!res.ok) throw new Error(ghError(res));
+  const files=(await res.json()).filter(f=>f.type==='file'&&/^\d{4}-\d{2}\.json$/.test(f.name));
+  for(const f of files){
+    const got=await getFile(`${DIR}/${f.name}`); if(!got) continue;
+    const m=f.name.slice(0,7);
+    try{mergeIn((JSON.parse(got.text).annotazioni)||[]);}catch(e){throw new Error(`Il file ${f.name} non è JSON valido`);}
+    shas[m]=got.sha;
+  }
+}
+async function pushMonth(m,note){
+  const text=()=>JSON.stringify({formato:'registro-giudizi',versione:2,mese:m,annotazioni:entries.filter(e=>month(e)===m)},null,2)+'\n';
+  let res=await putFile(`${DIR}/${m}.json`,text(),note||`Aggiorna annotazioni ${m}`,shas[m]);
+  if(res.status===409||res.status===422){
+    const got=await getFile(`${DIR}/${m}.json`);
+    if(got){try{mergeIn(JSON.parse(got.text).annotazioni||[]);}catch(e){} shas[m]=got.sha;} else delete shas[m];
+    res=await putFile(`${DIR}/${m}.json`,text(),(note||`Aggiorna annotazioni ${m}`)+' (unione)',shas[m]);
+  }
+  if(!res.ok) throw new Error(ghError(res));
+  shas[m]=(await res.json()).content.sha;
+  dirty.delete(m);
+}
+async function sync(note){
+  if(!cfg||syncing) return;
+  syncing=true; setSync('busy','Salvataggio su GitHub…');
+  try{
+    for(const m of [...dirty].sort()) await pushMonth(m,note);
+    saveLocal(); setSync('ok','Salvato su GitHub');
+  }catch(e){
+    saveLocal(); setSync('bad',`${dirty.size} ${dirty.size===1?'mese':'mesi'} non ancora su GitHub: ${e.message}`,true);
+  }finally{syncing=false; render();}
+}
+function setSync(state,text,retry){
+  $('dot').className='dot '+(state||''); $('syncText').textContent=text;
+  $('retryBtn').classList.toggle('hidden',!retry);
+}
+$('retryBtn').addEventListener('click',()=>sync());
+
+async function connect(){
+  $('e-conn').textContent='';
+  const c={owner:$('cOwner').value.trim(),repo:$('cRepo').value.trim(),branch:$('cBranch').value.trim()||'main',token:$('cToken').value.trim()};
+  if(!c.owner||!c.repo||!c.token){$('e-conn').textContent='Servono utente, repository e token';return;}
+  const prev=cfg; cfg=c;
+  setSync('busy','Collegamento…'); $('connBtn').disabled=true;
+  try{
+    await pullAll(); saveCfg(); saveLocal();
+    live().forEach(e=>{if(!shas[month(e)]) dirty.add(month(e));});
+    $('conn').open=false; toast('Collegato: annotazioni caricate');
+    render(); await sync('Prima sincronizzazione');
+  }catch(e){
+    cfg=prev; $('e-conn').textContent=e.message; setSync(prev?'bad':'', prev?'Errore di collegamento':'Non collegato');
+  }finally{$('connBtn').disabled=false; renderConn();}
+}
+$('connBtn').addEventListener('click',connect);
+$('disconnBtn').addEventListener('click',()=>{
+  if(dirty.size&&!confirm('Alcune modifiche non sono ancora su GitHub. Scollegando resteranno solo in questo browser. Continuare?')) return;
+  cfg=null; saveCfg(); setSync('','Non collegato'); renderConn(); render(); toast('Dispositivo scollegato');
+});
+function renderConn(){
+  $('disconnBtn').classList.toggle('hidden',!cfg);
+  $('connSummary').textContent=cfg?`Collegato a ${cfg.owner}/${cfg.repo} (${cfg.branch})`:'Collegamento al repository dei dati';
+  if(cfg){$('cOwner').value=cfg.owner;$('cRepo').value=cfg.repo;$('cBranch').value=cfg.branch;$('cToken').value=cfg.token;}
+}
+
+/* ---------- modulo ---------- */
+function setTipo(t){
+  tipo=t;
+  document.querySelectorAll('.types button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.t===t));
+  $('dpoFields').classList.toggle('hidden',t!=='dpo');
+  $('sftFields').classList.toggle('hidden',t==='dpo');
+  $('sottField').classList.toggle('hidden',t!=='dpo');
+  $('rispostaLabel').innerHTML=t==='test'
+    ?'La tua risposta di riferimento <span class="hint">scritta prima di vedere quella del modello</span>'
+    :'Il tuo ragionamento <span class="hint">con i passaggi intermedi esplicitati</span>';
+  $('typeNote').textContent=NOTES[t]; clearErrs();
+}
+document.querySelectorAll('.types button').forEach(b=>b.addEventListener('click',()=>setTipo(b.dataset.t)));
+function clearErrs(){['prompt','chosen','rejected','risposta'].forEach(k=>$('e-'+k).textContent='');}
+['prompt','chosen','rejected','risposta'].forEach(k=>$(k).addEventListener('input',()=>$('e-'+k).textContent=''));
+
+function readForm(){
+  return {tipo,prompt:$('prompt').value.trim(),chosen:$('chosen').value.trim(),rejected:$('rejected').value.trim(),
+    motivazione:$('motivazione').value.trim(),risposta:$('risposta').value.trim(),
+    ambiti:$('ambiti').value.split(',').map(s=>s.trim()).filter(Boolean),
+    fonte:$('fonte').value,sottigliezza:Number($('sott').value),riferimento:$('rif').value.trim()};
+}
+function validate(d){
+  clearErrs(); let ok=true;
+  if(!d.prompt){$('e-prompt').textContent='Scrivi il problema prima di salvare';ok=false;}
+  if(d.tipo==='dpo'){
+    if(!d.chosen){$('e-chosen').textContent='Manca la versione accolta';ok=false;}
+    if(!d.rejected){$('e-rejected').textContent='Manca la versione scartata';ok=false;}
+    if(d.chosen&&d.rejected&&norm(d.chosen)===norm(d.rejected)){$('e-rejected').textContent='Le due versioni sono identiche';ok=false;}
+  } else if(!d.risposta){$('e-risposta').textContent=d.tipo==='test'?'Manca la risposta di riferimento':'Manca il ragionamento';ok=false;}
+  return ok;
+}
+function leakCheck(d){
+  const p=norm(d.prompt);
+  return live().some(e=>e.id!==editing&&norm(e.prompt)===p&&((d.tipo==='test')!==(e.tipo==='test')))
+    ?'Attenzione: lo stesso problema compare sia nel banco di prova sia nei dati di addestramento.':'';
+}
+function resetForm(){
+  ['prompt','chosen','rejected','motivazione','risposta','rif'].forEach(k=>$(k).value='');
+  editing=null; $('formTitle').textContent='Nuova annotazione'; $('saveBtn').textContent='Salva annotazione';
+  $('cancelBtn').classList.add('hidden'); clearErrs();
+}
+function save(){
+  const d=readForm(); if(!validate(d)) return;
+  const leak=leakCheck(d), now=new Date().toISOString(); let note;
+  if(editing){
+    const i=entries.findIndex(e=>e.id===editing);
+    if(i>-1){entries[i]={...entries[i],...d,modificato:now};dirty.add(month(entries[i]));}
+    note=`Modifica: ${d.prompt.slice(0,60)}`; toast('Modifica salvata');
+  } else {
+    const e={id:uid(),...d,creato:now,modificato:now}; entries.unshift(e); dirty.add(month(e));
+    note=`Nuova annotazione: ${d.prompt.slice(0,60)}`; toast('Annotazione salvata');
+  }
+  saveLocal(); resetForm(); render(); $('prompt').focus();
+  if(leak) setTimeout(()=>toast(leak),2900);
+  sync(note);
+}
+$('saveBtn').addEventListener('click',save);
+$('cancelBtn').addEventListener('click',resetForm);
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key==='Enter'){e.preventDefault();save();}});
+
+function edit(id){
+  const e=entries.find(x=>x.id===id); if(!e) return;
+  editing=id; setTipo(e.tipo);
+  $('prompt').value=e.prompt||''; $('chosen').value=e.chosen||''; $('rejected').value=e.rejected||'';
+  $('motivazione').value=e.motivazione||''; $('risposta').value=e.risposta||'';
+  $('ambiti').value=(e.ambiti||[]).join(', '); $('fonte').value=e.fonte||'nuova';
+  $('sott').value=String(e.sottigliezza||2); $('rif').value=e.riferimento||'';
+  $('formTitle').textContent='Modifica annotazione'; $('saveBtn').textContent='Salva modifiche'; $('cancelBtn').classList.remove('hidden');
+  window.scrollTo({top:0,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth'}); $('prompt').focus();
+}
+function del(id){
+  const e=entries.find(x=>x.id===id); if(!e) return;
+  if(!confirm('Eliminare questa annotazione? Resterà recuperabile solo dalla storia del repository.')) return;
+  e.eliminato=true; e.modificato=new Date().toISOString(); dirty.add(month(e));
+  if(editing===id) resetForm();
+  saveLocal(); render(); toast('Annotazione eliminata'); sync(`Eliminata: ${e.prompt.slice(0,60)}`);
+}
+
+/* ---------- vista ---------- */
+function render(){
+  const all=live(), dpo=all.filter(e=>e.tipo==='dpo'), sft=all.filter(e=>e.tipo==='sft'), test=all.filter(e=>e.tipo==='test');
+  const w=$('localWarn');
+  if(!cfg&&all.length){w.textContent='Le annotazioni sono solo in questo browser. Collega il repository per conservarle su GitHub.';w.classList.remove('hidden');}
+  else w.classList.add('hidden');
+
+  const max=MILESTONES[MILESTONES.length-1], r=document.querySelector('.ruler');
+  r.querySelectorAll('.tick,.tl').forEach(n=>n.remove());
+  MILESTONES.forEach(m=>{const pos=Math.sqrt(m/max)*100;
+    const t=document.createElement('div');t.className='tick';t.style.left=pos+'%';r.appendChild(t);
+    const l=document.createElement('div');l.className='tl';l.style.left=Math.min(pos,96)+'%';l.textContent=m.toLocaleString('it-IT');r.appendChild(l);});
+  $('fill').style.width=Math.min(Math.sqrt(dpo.length/max),1)*100+'%';
+  const next=MILESTONES.find(m=>dpo.length<m);
+  $('rulerNote').textContent=next?`${dpo.length} coppie. Ne mancano ${(next-dpo.length).toLocaleString('it-IT')} alla soglia di ${next.toLocaleString('it-IT')}.`:`${dpo.length} coppie: oltre tutte le soglie indicative.`;
+
+  const sub=[0,0,0,0]; dpo.forEach(e=>sub[e.sottigliezza||2]++);
+  $('stats').innerHTML=[['Coppie di giudizio',dpo.length],['Ragionamenti completi',sft.length],['Banco di prova',test.length],['Coppie con scarto evidente',sub[1]],['Coppie con scarto sottile',sub[3]]]
+    .map(([k,v])=>`<div class="stat"><span>${k}</span><span>${v}</span></div>`).join('');
+  const counts={}; all.forEach(e=>(e.ambiti||[]).forEach(a=>counts[a]=(counts[a]||0)+1));
+  const top=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+  $('ambitiStats').innerHTML=top.length?top.slice(0,6).map(([k,v])=>`<div class="stat"><span>${esc(k)}</span><span>${v}</span></div>`).join(''):'<p class="note">Nessun ambito indicato ancora.</p>';
+  $('ambitiList').innerHTML=top.map(([k])=>`<option value="${esc(k)}">`).join('');
+  let vn='';
+  if(all.length>=20&&top.length&&top[0][1]/all.length>0.5) vn=`Più di metà delle annotazioni riguarda «${top[0][0]}»: il modello imparerebbe il tuo giudizio su un tema, non in generale.`;
+  else if(dpo.length>=20&&sub[1]/dpo.length>0.5) vn='Più di metà delle coppie ha uno scarto evidente: le coppie sottili insegnano di più.';
+  $('varNote').textContent=vn;
+
+  const q=norm($('q').value), ft=$('ft').value;
+  const list=all.filter(e=>(!ft||e.tipo===ft)&&(!q||norm([e.prompt,e.chosen,e.rejected,e.motivazione,e.risposta,(e.ambiti||[]).join(' '),e.riferimento].join(' ')).includes(q)));
+  const lab={dpo:['Coppia','b-dpo'],sft:['Ragionamento','b-sft'],test:['Banco di prova','b-test']};
+  $('entries').innerHTML=list.length?list.map(e=>{
+    const p=e.prompt.length>220?e.prompt.slice(0,220)+'…':e.prompt;
+    const meta=[fmtDate(e.creato),(e.ambiti||[]).join(', '),e.riferimento].filter(Boolean).map(esc).join(' / ');
+    return `<div class="entry"><span class="badge ${lab[e.tipo][1]}">${lab[e.tipo][0]}</span><div><p>${esc(p)}</p><div class="meta">${meta}</div></div><div class="ops"><button data-e="${e.id}">Modifica</button><button data-d="${e.id}">Elimina</button></div></div>`;
+  }).join(''):`<div class="empty">${all.length?'Nessuna annotazione corrisponde alla ricerca.':'Il registro è vuoto. Comincia da una scelta recente: un passaggio che hai riscritto, e perché.'}</div>`;
+}
+$('entries').addEventListener('click',ev=>{const b=ev.target.closest('button');if(!b)return;if(b.dataset.e)edit(b.dataset.e);if(b.dataset.d)del(b.dataset.d);});
+$('q').addEventListener('input',render); $('ft').addEventListener('change',render);
+
+/* ---------- esportazioni ---------- */
+const FORMATS={
+  dpo:{f:e=>e.tipo==='dpo',m:e=>({prompt:e.prompt,chosen:e.chosen,rejected:e.rejected}),n:'dpo'},
+  sft:{f:e=>e.tipo==='sft',m:e=>({prompt:e.prompt,completion:e.risposta}),n:'sft'},
+  test:{f:e=>e.tipo==='test',m:e=>({prompt:e.prompt,riferimento:e.risposta,ambiti:e.ambiti||[]}),n:'banco-di-prova'}
+};
+function jsonlOf(k){const F=FORMATS[k];const rows=live().filter(F.f);return {rows:rows.length,text:rows.map(e=>JSON.stringify(F.m(e))).join('\n')+(rows.length?'\n':'')};}
+function download(name,text,type){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},500);}
+const stamp=()=>new Date().toISOString().slice(0,10);
+['dpo','sft','test'].forEach(k=>$(k+'Btn').addEventListener('click',()=>{const j=jsonlOf(k);if(!j.rows)return toast('Niente da esportare per questo tipo');download(`${FORMATS[k].n}-${stamp()}.jsonl`,j.text,'application/x-ndjson');toast(`${j.rows} righe scaricate`);}));
+$('bkBtn').addEventListener('click',()=>{if(!entries.length)return toast('Il registro è vuoto');download(`registro-giudizi-backup-${stamp()}.json`,JSON.stringify({formato:'registro-giudizi',versione:2,esportato:new Date().toISOString(),annotazioni:entries},null,2),'application/json');toast('Backup scaricato');});
+$('pubBtn').addEventListener('click',async()=>{
+  if(!cfg) return toast('Collega prima il repository');
+  $('pubBtn').disabled=true; setSync('busy','Aggiornamento dei file di addestramento…');
+  try{
+    for(const k of ['dpo','sft','test']){
+      const path=`${EXP}/${FORMATS[k].n}.jsonl`, cur=await getFile(path), j=jsonlOf(k);
+      if(cur&&cur.text===j.text) continue;
+      const res=await putFile(path,j.text,`Aggiorna ${FORMATS[k].n}.jsonl (${j.rows} righe)`,cur&&cur.sha);
+      if(!res.ok) throw new Error(ghError(res));
+    }
+    setSync('ok','Salvato su GitHub'); toast('File di addestramento aggiornati nel repository');
+  }catch(e){setSync('bad','Aggiornamento non riuscito: '+e.message,false);}
+  finally{$('pubBtn').disabled=false;}
+});
+
+$('impBtn').addEventListener('click',()=>$('impFile').click());
+$('impFile').addEventListener('change',async ev=>{
+  const f=ev.target.files[0]; ev.target.value=''; if(!f) return;
+  let text; try{text=await f.text();}catch(e){return toast('Impossibile leggere il file');}
+  let incoming=[]; const now=new Date().toISOString();
+  const base={motivazione:'',risposta:'',chosen:'',rejected:'',ambiti:[],fonte:'esistente',sottigliezza:2,riferimento:'',creato:now,modificato:now};
+  try{const o=JSON.parse(text);incoming=Array.isArray(o)?o:(o.annotazioni||[]);}
+  catch(e){
+    try{incoming=text.split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{const o=JSON.parse(l);
+      if(o.chosen!==undefined&&o.rejected!==undefined) return {...base,id:uid(),tipo:'dpo',prompt:o.prompt||'',chosen:o.chosen,rejected:o.rejected};
+      if(o.completion!==undefined) return {...base,id:uid(),tipo:'sft',prompt:o.prompt||'',risposta:o.completion};
+      if(o.riferimento!==undefined) return {...base,id:uid(),tipo:'test',prompt:o.prompt||'',risposta:o.riferimento,ambiti:o.ambiti||[]};
+      return null;}).filter(Boolean);}
+    catch(e2){return toast('Formato non riconosciuto: usa un backup .json o un file .jsonl');}
+  }
+  incoming=incoming.filter(e=>e&&e.prompt&&['dpo','sft','test'].includes(e.tipo)).map(e=>({...e,id:e.id||uid(),creato:e.creato||now,modificato:e.modificato||now}));
+  if(!incoming.length) return toast('Il file non contiene annotazioni riconoscibili');
+  const before=new Set(entries.map(e=>e.id));
+  mergeIn(incoming); incoming.forEach(e=>dirty.add(month(e)));
+  const added=incoming.filter(e=>!before.has(e.id)).length;
+  saveLocal(); render(); toast(added?`${added} annotazioni importate`:'Annotazioni già presenti, aggiornate le più recenti');
+  sync(`Importazione da ${f.name}`);
+});
+
+/* ---------- avvio ---------- */
+loadLocal(); setTipo('dpo'); renderConn(); render();
+if(cfg){
+  setSync('busy','Caricamento da GitHub…');
+  pullAll().then(()=>{saveLocal();render();return dirty.size?sync():setSync('ok','Salvato su GitHub');})
+    .catch(e=>setSync('bad','Uso la copia locale: '+e.message,true));
+} else { $('conn').open=true; }
+})();
+</script>
+</body>
+</html>
